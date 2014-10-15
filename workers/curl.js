@@ -1,0 +1,1 @@
+// returns { url: url, html: html } given an input event with an url

@@ -1,8 +1,18 @@
 var Sky = require('./lib/sky');
 
+/* WIREUP */
+
+var filereader = require('../workers/filereader');
+var linesplitter = require('../workers/linesplitter');
 var curl = require('../workers/curl');
 var htmlparser = require('../workers/htmlparser');
 var htmltextextractor = require('../workers/htmltextextractor');
+var wordSplitter = require('../workers/wordsplitter');
+var wordCombiner = require('../workers/wordCombiner');
+var saveToDisk = require('../workers/saveToDisk');
+var newspapers = require('./worker/newspapers');
+
+var environment = Sky.environment('local');
 
 exports.extractTextOnWebpage = function() {
 	return Skynet.pipeline()

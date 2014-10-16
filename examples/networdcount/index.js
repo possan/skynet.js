@@ -1,7 +1,6 @@
-var Sky = require('./lib/sky');
+var Skynet = require('../../lib/skynet.js').Skynet;
 
-/* WIREUP */
-
+/*
 var filereader = require('../workers/filereader');
 var linesplitter = require('../workers/linesplitter');
 var curl = require('../workers/curl');
@@ -12,7 +11,49 @@ var wordCombiner = require('../workers/wordCombiner');
 var saveToDisk = require('../workers/saveToDisk');
 var newspapers = require('./worker/newspapers');
 
-var extractTextOnWebpage = require('./pipelines/extractText.js').extractTextOnWebpage;
+var environment = Sky.environment('local');
+
+
+function extractTextOnWebpage() {
+	return Skynet.pipeline()
+
+		//
+		// curl node
+		//
+		// input:
+		// { url: 'http://...' }
+		//
+		// output:
+		// { url: 'http://...', html: '<html>...</html>' }
+		//
+		.pipe( curl({}) )
+
+		//
+		// html/dom parser node
+		//
+		// input:
+		// { url: 'http://...', html: '<html>...</html>' }
+		//
+		// output:
+		// { url: 'http://...', dom: { 'html': {} } '}
+		//
+		.pipe( domparser({}) )
+
+		//
+		// text extractor node
+		//
+		// input:
+		// { url: 'http://...', dom: { 'html': {} } '}
+		//
+		// output:
+		// { text: 'hej hopp' }
+		// { text: 'b' }
+		// { text: 'c' }
+		//
+		.pipe( htmltextextractor({ tags: ['p'] }) )
+
+		;
+}
 
 function singleNewspaperPipeline() {
 	return Skynet.pipeline()
@@ -38,29 +79,38 @@ function singleNewspaperPipeline() {
 		// { word: 'hej' }
 		// { word: 'hopp' }
 		//
-		.pipe( wordsplitter({ separators: ['', '\t', '\n', '\r'] }) );
+		.pipe( wordsplitter({ separators: ['', '\t', '\n', '\r'] }) )
+
+		;
 }
+*/
 
 var webpagewordcounter = Skynet.pipeline()
 
 	//
 	// Initial events
 	//
-	.from(newspapers)
+	.from('newspapers')
 
 	//
 	// Spawn one pipeline per input
 	//
-	.spawnParallel(singleNewspaperPipeline)
+	.spawnParallel('singleNewspaperPipeline')
 
 	//
 	// Combine results
 	//
-	.pipe(wordCombiner())
+	.pipe('wordCombiner')
 
 	//
 	// Save it to disk
 	//
-	.pipe(saveReport());
+	.pipe('saveReport')
 
-Skynet.run(webpagewordcounter, environment);
+	;
+
+Skynet.run(webpagewordcounter, 'environment');
+
+// Skynet.run('x', 'y');
+
+

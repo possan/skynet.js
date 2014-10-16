@@ -1,4 +1,4 @@
-var Sky = require('../../lib/sky');
+var Sky = require('../lib/sky');
 var environment = Sky.env('local');
 
 var aftonbladet = require('./workers/aftonbladet');

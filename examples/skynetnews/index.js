@@ -1,15 +1,13 @@
-var Sky = require('../lib/sky');
+var Sky = require('../../lib/sky');
 var environment = Sky.env('local');
 
 var aftonbladet = require('./workers/aftonbladet');
 var svd = require('./workers/svd');
 var linkCounter = require('./workers/linkCounter');
+var logger = require('./workers/logger');
 
 var pipeline = Sky.parallel([aftonbladet, svd])
   .pipe(linkCounter)
-  .pipe({ process: function(aggregate){
-    console.log(aggregate);
-  }});
+  .pipe(logger);
 
-
-pipeline.pipe(console.stdout)
+Sky.start(pipeline, environment);

@@ -10,3 +10,5 @@ worker.process = function(){
     });
   }, 200);
 }
+
+module.exports = worker;

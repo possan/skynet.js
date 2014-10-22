@@ -1,5 +1,5 @@
-var Sky = require('../../lib/sky');
-var worker = module.exports = Sky.worker();
+var Sky = require('../../../lib/sky');
+var worker = module.exports = new Sky.worker();
 
 worker.start = function(){
 
@@ -12,3 +12,5 @@ worker.start = function(){
   }, 200);
 
 }
+
+module.exports = worker;

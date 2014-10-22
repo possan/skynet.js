@@ -7,4 +7,7 @@ worker.process = function(item){
   if (item.link) {
     (urls[item.link] = urls[item.link] || []).push(item);
   }
+  worker.emit(urls);
 }
+
+module.exports = worker;

@@ -14,25 +14,25 @@ describe('pipeline', function () {
 
   beforeEach(function() {
     env = Sky.env('local');
-    worker1 = new Worker(null, 'worker1');
-    worker2 = new Worker(null, 'worker2');
-    worker3 = new Worker(null, 'worker3');
+    worker1 = new Worker('worker1', env);
+    worker2 = new Worker('worker2', env);
+    worker3 = new Worker('worker3', env);
   });
 
   describe('ping', function() {
     it('gets ping', function(done) {
       pipeline = worker1.pipe(worker2).pipe(worker3);
-      pipeline.process = function(item) {
+      pipeline.process_control = function(item) {
         // console.log('end of pipeline', item);
         expect(item).to.exist;
         done();
       }
-      worker1.emit({ __control: 'PING' });
+      worker1.write({ __control: 'PING' });
     });
 
     it('gets complete route', function(done) {
       pipeline = worker1.pipe(worker2).pipe(worker3);
-      pipeline.process = function(item) {
+      pipeline.process_control = function(item) {
         // console.log('end of pipeline 2', item);
         expect(item).to.exist;
         expect(item.__chain).to.exist;
@@ -43,24 +43,24 @@ describe('pipeline', function () {
           worker3.id]);
         done();
       }
-      worker1.emit({ __control: 'PING' });
+      worker1.write({ __control: 'PING' });
     });
   });
 
   describe('connect', function () {
     it('a worker should receive a connect command', function(done) {
-      worker1.process = function(item) {
+      worker1.process_control = function(item) {
         // console.log('item handled by worker1', item);
         expect(item).to.exist;
         expect(item.__control).to.equal('CONNECT');
         done();
       }
-      worker1.emit({ __control: 'CONNECT' });
+      worker1.write({ __control: 'CONNECT' });
     });
 
     it('a worker should return a url to the next node', function(done) {
       worker1.pipe(worker2);
-      worker2.process = function(item) {
+      worker2.process_control = function(item) {
         // console.log('worker2 received', item);
         expect(item).to.exist;
         expect(item.id).to.equal(worker1.id);
@@ -68,7 +68,7 @@ describe('pipeline', function () {
         expect(item.url).to.equal(worker1.url);
         done();
       }
-      worker1.emit({ __control: 'CONNECT' });
+      worker1.write({ __control: 'CONNECT' });
     });
 
     it('gets url from all nodes', function(done) {
@@ -81,7 +81,7 @@ describe('pipeline', function () {
         expect(item.url).to.eql(worker3.url);
         done();
       });
-      worker1.emit({ __control: 'CONNECT' });
+      worker1.write({ __control: 'CONNECT' });
     });
   });
 
@@ -91,6 +91,28 @@ describe('pipeline', function () {
 
   describe('ready', function () {
     
+  });
+
+  describe('worker data flow', function () {
+
+    it('one worker processes data', function(done) {
+      worker1.process = function(item) {
+        item.apa = 234;
+        worker1.emit(item);
+      }
+
+      worker1.on('data', function(item) {
+        console.log('worker1 got data', item);
+        expect(item).to.exist;
+        expect(item.test).to.exist;
+        expect(item.test).to.eql(123);
+        expect(item.apa).to.exist;
+        expect(item.apa).to.eql(234);
+        done();
+      });
+
+      worker1.write({ test: 123 });
+    });
   });
 
   describe('start', function () {

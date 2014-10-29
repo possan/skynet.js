@@ -1,0 +1,27 @@
+{
+  "name": "skynet.js",
+  "version": "1.0.0",
+  "description": "Streamjobs.js ====",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha tests/units/* -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/possan/skynet.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/possan/skynet.js/issues"
+  },
+  "homepage": "https://github.com/possan/skynet.js",
+  "dependencies": {
+    "chai": "^1.9.2",
+    "uuid": "^2.0.1"
+  }
+}

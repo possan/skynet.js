@@ -32,17 +32,14 @@ describe('environment', function () {
       });
     });
 
-    it('should receive data', function(done) {
+    it('should respond on port', function(done) {
       env.spawn(worker1, {}, function(err, config) {
-        var receiver = new Worker();
-        request.get('http://' + config.host + ':' + config.port).pipe(receiver);
-        receiver.process = function(item) {
-          // console.log('item handled by worker1', item);
-          expect(item).to.exist;
-          expect(item.data).to.equal('foo');
+        request.get('http://' + config.host + ':' + config.port)
+        .on('socket', function(socket){
+          expect(socket, 'socket').to.exist;
+          expect(socket.destroyed, 'destroyed').to.be.false;
           done();
-        }
-        worker1.write({ data : 'foo' });
+        });
       });
     });
 

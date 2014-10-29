@@ -58,32 +58,6 @@ describe('pipeline', function () {
       }
       worker1.write({ __control: 'CONNECT' });
     });
-
-    xit('a worker should return a url to the next node', function(done) {
-      worker1.pipe(worker2);
-      worker2.process_control = function(item) {
-        // console.log('worker2 received', item);
-        expect(item).to.exist;
-        expect(item.id).to.equal(worker1.id);
-        expect(item.url).to.exist;
-        expect(item.url).to.equal(worker1.url);
-        done();
-      }
-      worker1.write({ __control: 'CONNECT' });
-    });
-
-    xit('gets url from all nodes', function(done) {
-      pipeline = worker1.pipe(worker2).pipe(worker3);
-      pipeline.on('data', function(item) {
-        expect(item).to.exist;
-        expect(item.id).to.exist;
-        expect(item.id).to.eql(worker3.id);
-        expect(item.url).to.exist;
-        expect(item.url).to.eql(worker3.url);
-        done();
-      });
-      worker1.write({ __control: 'CONNECT' });
-    });
   });
 
   describe('disconnect', function () {

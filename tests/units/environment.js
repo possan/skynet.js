@@ -9,33 +9,67 @@ var expect = chai.expect;
 describe('environment', function () {
 
   var env;
-  var worker;
+  var worker1;
+  var worker2;
+  var worker3;
 
   beforeEach(function() {
     env = new Environment();
-    worker = new Worker('worker1', env);
+    worker1 = new Worker('worker1', env);
+    worker2 = new Worker('worker1', env);
+    worker3 = new Worker('worker1', env);
   });
 
   describe('spawn', function() {
-    it('can wireup streams correctly', function (done) {
-      var oldInput = worker.input;
-      var oldOutput = worker.output;
-
-      expect(worker.control_input).to.not.exist;
-      expect(worker.control_output).to.not.exist;
-
-      env.spawn(worker, {}, function(err, worker2) {
-
-        // expect(worker2.input).to.not.equal(oldInput);
-        // expect(worker2.output).to.not.equal(oldOutput);
-
-        // expect(worker2.control_input).to.exist;
-        // expect(worker.control_output).to.exist;
-
-        // expect(worker.control_input).to.eql(oldInput);
-        // expect(worker.control_output).to.eql(oldOutput);
+    it('can wireup new instance correctly', function (done) {
+      var oldInput = worker1.input;
+      var oldOutput = worker1.output;
+      expect(worker1.control_input).to.not.exist;
+      expect(worker1.control_output).to.not.exist;
+      env.spawn(worker1, {}, function(err, child) {
+        expect(child).to.not.equal(worker1);
+        // expect(child.input).to.exist;
+        // expect(child.output).to.exist;
         done();
       });
+    });
+
+    it('a spawned worker should receive a connect command', function(done) {
+      env.spawn(worker1, {}, function(err, child) {
+        child.process = function(item) {
+          // console.log('item handled by worker1', item);
+          expect(item).to.exist;
+          expect(item.__control).to.equal('XXX');
+          done();
+        }
+        child.write({ __control: 'XXX' });
+      });
+    });
+
+    it('a worker should receive commands', function(done) {
+      worker1.pipe(worker2);
+      // env.spawn(worker2, {}, function(err, child) {
+      worker2.process = function(item) {
+        // console.log('item handled by worker1', item);
+        // expect(item).to.exist;
+        // expect(item.__control).to.equal('XXX');
+        done();
+      }
+      // });
+      worker1.write({ __control: 'XXX' });
+    });
+
+    xit('gets url from all nodes', function(done) {
+      pipeline = worker1.pipe(worker2).pipe(worker3);
+      pipeline.on('data', function(item) {
+        expect(item).to.exist;
+        expect(item.id).to.exist;
+        expect(item.id).to.eql(worker3.id);
+        // expect(item.url).to.exist;
+        // expect(item.url).to.eql(worker3.url);
+        done();
+      });
+      worker1.write({ __control: 'CONNECT' });
     });
   });
 

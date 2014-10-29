@@ -2,6 +2,7 @@ var chai = require('chai');
 var Environment = require('../../lib/environment');
 var Sky = require('../../lib/sky');
 var Worker = require('../../lib/worker');
+var request = require('request');
 
 var stream = require('stream');
 var expect = chai.expect;
@@ -20,21 +21,32 @@ describe('environment', function () {
     worker3 = new Worker('worker1', env);
   });
 
-  describe('spawn', function() {
-    it('can wireup new instance correctly', function (done) {
-      var oldInput = worker1.input;
-      var oldOutput = worker1.output;
-      expect(worker1.control_input).to.not.exist;
-      expect(worker1.control_output).to.not.exist;
-      env.spawn(worker1, {}, function(err, child) {
-        expect(child).to.not.equal(worker1);
-        // expect(child.input).to.exist;
-        // expect(child.output).to.exist;
+  describe('a spawned worker', function() {
+    
+    it('should return a valid config', function(done) {
+      env.spawn(worker1, {}, function(err, config) {
+        expect(config).to.exist;
+        expect(config.host, 'host').to.exist;
+        expect(config.port, 'port').to.exist;
         done();
       });
     });
 
-    it('a spawned worker should receive a connect command', function(done) {
+    it('should receive data', function(done) {
+      env.spawn(worker1, {}, function(err, config) {
+        var receiver = new Worker();
+        request.get('http://' + config.host + ':' + config.port).pipe(receiver);
+        receiver.process = function(item) {
+          // console.log('item handled by worker1', item);
+          expect(item).to.exist;
+          expect(item.data).to.equal('foo');
+          done();
+        }
+        worker1.write({ data : 'foo' });
+      });
+    });
+
+    xit('should receive a connect command', function(done) {
       env.spawn(worker1, {}, function(err, child) {
         child.process = function(item) {
           // console.log('item handled by worker1', item);
@@ -46,7 +58,8 @@ describe('environment', function () {
       });
     });
 
-    it('a worker should receive commands', function(done) {
+
+    xit('a worker should receive commands', function(done) {
       worker1.pipe(worker2);
       // env.spawn(worker2, {}, function(err, child) {
       worker2.process = function(item) {

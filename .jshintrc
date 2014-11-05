@@ -24,6 +24,7 @@
     /* MOCHA */
     "describe"   : false,
     "it"         : false,
+    "xit"         : false,
     "before"     : false,
     "beforeEach" : false,
     "after"      : false,

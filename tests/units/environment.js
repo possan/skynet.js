@@ -2,7 +2,6 @@ var chai = require('chai');
 var Environment = require('../../lib/environment');
 var Sky = require('../../lib/sky');
 var Worker = require('../../lib/worker');
-var request = require('request');
 
 var stream = require('stream');
 var expect = chai.expect;

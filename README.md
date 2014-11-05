@@ -3,7 +3,7 @@ Streamjobs.js
 
 ### Background
 
-Hadoopish workers in javascript but based on http streams and local event streams instead of intermediate filesystem storage.
+Hadoopish workers in Javascript based on http streams and local event streams instead of intermediate filesystem storage.
 
 ## Roles:
 

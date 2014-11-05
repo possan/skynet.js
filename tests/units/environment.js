@@ -43,17 +43,38 @@ describe('environment', function () {
       });
     });
 
-    xit('should receive a connect command', function(done) {
-      env.spawn(worker1, {}, function(err, child) {
-        child.process = function(item) {
-          // console.log('item handled by worker1', item);
-          expect(item).to.exist;
-          expect(item.__control).to.equal('XXX');
+    it('should receive a command via http request', function(done) {
+      env.spawn(worker1, {}, function(err, config) {
+        request.get({json: true, uri: 'http://' + config.host + ':' + config.port})
+        .on('socket', function(){
+          setTimeout(function(){ 
+            worker1.write({ __control: 'XXX' });
+          }, 10);
+        })
+        .on('data', function(data){
+          var item = JSON.parse(data);
+          expect(item, 'data').to.exist;
+          expect(item.__control, 'control').to.eql('XXX');
           done();
-        }
-        child.write({ __control: 'XXX' });
+        });
       });
     });
+
+    it('should receive a command via http', function(done) {
+      env.spawn(worker1, {}, function(err, config) {
+        request.get({json: true, uri: 'http://' + config.host + ':' + config.port})
+        .on('socket', function(){
+          setTimeout(function(){ // HACK: when do we know it's ready...
+            worker1.write({ __control: 'XXX' });
+          }, 10);
+        })
+        .on('data', function(data){
+          expect(data, 'data').to.exist;
+          done();
+        });
+      });
+    });
+
 
 
     xit('a worker should receive commands', function(done) {
